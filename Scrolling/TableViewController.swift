@@ -18,16 +18,24 @@ class TableViewController: UITableViewController {
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
         self.tableView.refreshControl = UIRefreshControl()
-        self.tableView.refreshControl?.addTarget(self, action: #selector(refresh), for: .touchUpInside )
+        self.tableView.refreshControl?.addTarget(self, action: #selector(refresh), for: .valueChanged )
+        self.navigationController?.navigationBar.backgroundColor = .blue
         
     }
 
     // MARK: - Table view data source
     @objc func refresh()
     {
-        URLSession.shared.dataTask(with: URL(string: "https://www.google.com")!, completionHandler: { data , response, error  in
-            self.tableView.refreshControl?.endRefreshing()
-        })
+        if let url = URL(string: "https://postman-echo.com/get?test=123")
+        {
+            URLSession.shared.dataTask(with: url, completionHandler: { data , response, error  in
+                DispatchQueue.main.async {
+                    self.tableView.refreshControl?.endRefreshing()
+
+                }
+            }).resume()
+        }
+       
     }
    
 
@@ -44,8 +52,11 @@ class TableViewController: UITableViewController {
 
         return cell
     }
-   
-
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.splitViewController?.delegate = self
+    }
+    
     /*
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
@@ -91,4 +102,14 @@ class TableViewController: UITableViewController {
     }
     */
 
+}
+extension TableViewController:UISplitViewControllerDelegate
+{
+    func splitViewController(
+                 _ splitViewController: UISplitViewController,
+                 collapseSecondary secondaryViewController: UIViewController,
+                 onto primaryViewController: UIViewController) -> Bool {
+            // Return true to prevent UIKit from applying its default behavior
+            return true
+        }
 }
